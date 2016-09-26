@@ -56,3 +56,6 @@ jspm_packages
 #OTHER
 
 .DS_Store
+
+#remove build directory
+build

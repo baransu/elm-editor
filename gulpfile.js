@@ -7,7 +7,7 @@ const gulpSequesnce = require('gulp-sequence');
 
 const config = {
   bowerDir: './bower_components',
-  dest: './public',
+  dest: './build',
   sassDir: './web/sass'
 };
 
