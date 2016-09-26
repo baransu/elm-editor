@@ -1,7 +1,7 @@
 {
   "name": "elm-editor",
   "version": "0.1.0",
-  "description": "Text editor based on Elm and Electron",
+  "description": "Text editor written in Elm on top of Electron",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
