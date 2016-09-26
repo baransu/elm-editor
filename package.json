@@ -1,0 +1,24 @@
+{
+  "name": "elm-editor",
+  "version": "0.1.0",
+  "description": "Text editor based on Elm and Electron",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Tomasz Cichocinski <tomaszcichocinski@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-bower": "0.0.13",
+    "gulp-clean": "^0.3.2",
+    "gulp-sass": "^2.3.2",
+    "gulp-sequence": "^0.4.6",
+    "node-elm-compiler": "^4.1.4"
+  },
+  "dependencies": {
+    "electron": "^1.4.1"
+  }
+}

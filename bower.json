@@ -1,0 +1,21 @@
+{
+  "name": "elm-editor",
+  "description": "Text editor based on Elm and Electron",
+  "main": "index.js",
+  "authors": [
+    "Tomasz Cichocinski <tomaszcichocinski@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "font-awesome": "fontawesome#^4.6.3",
+    "bootstrap-sass": "bootstrap-sass-official#^3.3.7"
+  }
+}
