@@ -36,12 +36,12 @@ type Msg
 
 renderLine : String -> Html a
 renderLine l =
-    div [ ]
-        [ span [ class "line" ] [ text l ] ]
+    div [ class "line" ]
+        [ span [ ] [ text l ] ]
 
 view : Model -> Html Msg
 view model =
-    div [ ] (List.map renderLine model.lines)
+    div [ class "pan" ] (List.map renderLine model.lines)
 
 -- UPDATE
 

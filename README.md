@@ -3,12 +3,17 @@
 ## Roadmap
 
 * [ ] basic text edit
-  * [ ] insert 
+  * [x] insert 
+  * [ ] concept of cursor
+  * [ ] cursor based insert
   * [ ] delete
   * [ ] indent(hard, soft tabs)
   * [ ] text selection
   * [ ] copy
   * [ ] paste
+* [ ] file managment
+  * [ ] open
+  * [ ] save
 * [ ] shortcuts API
 * [ ] syntax highlighting
 * [ ] themes API
