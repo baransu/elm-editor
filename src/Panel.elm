@@ -74,7 +74,7 @@ update message model =
                             case head (getLast lines) of
                                 Nothing -> []
                                 Just a ->
-                                    case dropRight 1 a of
+                                    case log "last" dropRight 1 a of
                                         "" -> []
                                         a -> [a]
 
