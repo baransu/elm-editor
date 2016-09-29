@@ -30,7 +30,7 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "" ]
+    div [ class "application" ]
         [ Html.App.map PanelMsg (Panel.view model.panelModel) ]
 
 

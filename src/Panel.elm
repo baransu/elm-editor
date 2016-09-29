@@ -3,8 +3,8 @@ module Panel exposing (..)
 --import Html.Events exposing ()
 import Char exposing (..)
 import Debug exposing (..)
-import Html exposing (Html, div, text, span)
-import Html.Attributes exposing (class)
+import Html exposing (Html, div, text, span, pre)
+import Html.Attributes exposing (class, style)
 import Keyboard
 import List exposing (..)
 import String exposing (..)
@@ -45,11 +45,28 @@ cursorToString : (Int, Int) -> String
 cursorToString (x, y)=
     toString x ++ " | " ++ toString y
 
+cursorTop : Int -> String
+cursorTop x =
+    toString (Basics.toFloat x * 16) ++ "px"
+
+cursorLeft : Int -> String
+cursorLeft y =
+    toString (Basics.toFloat y * 7.20125) ++ "px"
+
 view : Model -> Html Msg
 view model =
-    div [ class "an" ]
-        [ div [] (List.map renderLine model.lines)
-        , span [ class "line" ] [ text (cursorToString model.cursor)]
+    pre [ class "pan" ]
+        [ div [ class "layer code-layer"] (List.map renderLine model.lines)
+        , div
+              [ class "layer cursor-layer"]
+              [ div
+                [ class "cursor"
+                , style
+                      [ ("top", cursorTop (fst model.cursor) )
+                      , ("left", cursorLeft (snd model.cursor) )
+                      ]
+                ] []
+              ]
         ]
 
 -- UPDATE
