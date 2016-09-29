@@ -1,19 +1,20 @@
 module Panel exposing (..)
 
-import Html exposing (Html, div, text, span)
 --import Html.Events exposing ()
-import Html.Attributes exposing (class)
 import Char exposing (..)
-import String exposing (..)
 import Debug exposing (..)
+import Html exposing (Html, div, text, span)
+import Html.Attributes exposing (class)
 import Keyboard
 import List exposing (..)
+import String exposing (..)
 
 -- MODEL
 
 type alias Model =
     -- split buffer into String array
     { lines: List String
+    , cursor: (Int, Int)
     }
 
 initialModel : Model
@@ -22,14 +23,15 @@ initialModel =
           [ "bello world"
           , "other stuff"
           ]
+    , cursor = (0, 0)
     }
 
 -- MESSAGES
--- key pressed
--- shortcuts etc
 type Msg
     = KeyPressedMsg Keyboard.KeyCode
     | KeyDownMsg Keyboard.KeyCode
+    -- cursor change (arrows)
+    -- 
 
 
 -- VIEW
@@ -39,9 +41,16 @@ renderLine l =
     div [ class "line" ]
         [ span [ ] [ text l ] ]
 
+cursorToString : (Int, Int) -> String
+cursorToString (x, y)=
+    toString x ++ " | " ++ toString y
+
 view : Model -> Html Msg
 view model =
-    div [ class "pan" ] (List.map renderLine model.lines)
+    div [ class "an" ]
+        [ div [] (List.map renderLine model.lines)
+        , span [ class "line" ] [ text (cursorToString model.cursor)]
+        ]
 
 -- UPDATE
 
@@ -84,6 +93,7 @@ update message model =
 
         KeyDownMsg 13 ->
             ( { model | lines = model.lines ++ [""] }, Cmd.none )
+
         KeyPressedMsg keyCode ->
             let
                 string = keyToString keyCode
@@ -95,9 +105,69 @@ update message model =
             in
                 ( { model | lines = lastLess ++ [(last ++ string)] }, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        KeyDownMsg keyCode ->
+            case keyCode of
+                -- left/right
+                37 ->
+                    ( { model | cursor = left model }, Cmd.none)
+                39 ->
+                    ( { model | cursor = right model }, Cmd.none)
+                -- up/down
+                38 ->
+                    ( { model | cursor = up model }, Cmd.none)
+                40 ->
+                    ( { model | cursor = down model }, Cmd.none)
+                _ ->
+                    ( model, Cmd.none )
 
+left : Model -> (Int, Int)
+left model =
+    case model.cursor of
+        (_,0) -> model.cursor
+        (x,y) -> (x,y - 1)
+
+nth : Int -> List a -> Maybe a
+nth n xs =
+    if n < 0 then Nothing
+    else
+        case drop n xs of
+            [] -> Nothing
+            x::_ -> Just x
+
+-- TODO check against line length
+right : Model -> (Int, Int)
+right model =
+    case model.cursor of
+        (x,y) ->
+            case nth x model.lines of
+                Nothing -> model.cursor
+                Just line ->
+                    if y + 1 < String.length line  then
+                        (x,y + 1)
+                    else
+                        model.cursor
+
+
+up : Model -> (Int, Int)
+up model =
+    case model.cursor of
+        (0,_) -> model.cursor
+        -- calculate y if lines if shorter than previous line
+        (x,y) -> (x - 1,y)
+
+-- TODO check against lines count
+down : Model -> (Int, Int)
+down model =
+    case model.cursor of
+        (x,y) ->
+            let
+                lines = List.length model.lines
+            in
+                if x + 1 < lines then
+                    -- calculate y if lines if shorter than previous line
+                    (x + 1,y)
+                else
+                    model.cursor
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
