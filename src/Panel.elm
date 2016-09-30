@@ -23,7 +23,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { lines =
-          [ "bello world"
+          [ "bello world iasjdlasjdlkajdlkajsdlksj"
           , "other stuff"
           ]
     , cursor = (0, 0)
@@ -107,10 +107,20 @@ update message model =
 
                         lastLess = removeLast lines
                     in
-                        ( { model | lines = lastLess ++ last }, Cmd.none )
+                        ( { lines = lastLess ++ last
+                          -- cursor placement correction
+                          , cursor = model.cursor
+                          }
+                        , Cmd.none
+                        )
 
         KeyDownMsg 13 ->
-            ( { model | lines = model.lines ++ [""] }, Cmd.none )
+            ( { lines = model.lines ++ [""]
+              -- cursor placement correction
+              , cursor = model.cursor
+              }
+            , Cmd.none
+            )
 
         KeyPressedMsg keyCode ->
             let
@@ -121,7 +131,12 @@ update message model =
                         Just a -> a
                 lastLess = removeLast model.lines
             in
-                ( { model | lines = lastLess ++ [(last ++ string)] }, Cmd.none )
+                ( { lines = lastLess ++ [(last ++ string)]
+                    -- cursor placement correction
+                  , cursor = model.cursor
+                  }
+                , Cmd.none
+                )
 
         KeyDownMsg keyCode ->
             case keyCode of
@@ -138,6 +153,7 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+
 left : Model -> (Int, Int)
 left model =
     case model.cursor of
@@ -152,7 +168,6 @@ nth n xs =
             [] -> Nothing
             x::_ -> Just x
 
--- TODO check against line length
 right : Model -> (Int, Int)
 right model =
     case model.cursor of
@@ -173,17 +188,26 @@ up model =
         -- calculate y if lines if shorter than previous line
         (x,y) -> (x - 1,y)
 
--- TODO check against lines count
 down : Model -> (Int, Int)
 down model =
     case model.cursor of
         (x,y) ->
             let
                 lines = List.length model.lines
+                lineLength =
+                    case nth (x + 1) model.lines of
+                        Nothing -> y
+                        Just line ->
+                            let
+                                len = String.length line
+                            in
+                                if y < len then
+                                    y
+                                else
+                                    len
             in
                 if x + 1 < lines then
-                    -- calculate y if lines if shorter than previous line
-                    (x + 1,y)
+                    (x + 1,lineLength)
                 else
                     model.cursor
 
