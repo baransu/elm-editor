@@ -116,8 +116,8 @@ update message model =
 
         KeyDownMsg 13 ->
             ( { lines = model.lines ++ [""]
-              -- cursor placement correction
-              , cursor = model.cursor
+              -- move cursor to next row
+              , cursor = down model
               }
             , Cmd.none
             )
@@ -132,8 +132,8 @@ update message model =
                 lastLess = removeLast model.lines
             in
                 ( { lines = lastLess ++ [(last ++ string)]
-                    -- cursor placement correction
-                  , cursor = model.cursor
+                  -- move cursor to right by one char
+                  , cursor = right model
                   }
                 , Cmd.none
                 )
