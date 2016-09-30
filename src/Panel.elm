@@ -1,13 +1,16 @@
 module Panel exposing (..)
 
---import Html.Events exposing ()
 import Char exposing (..)
 import Debug exposing (..)
 import Html exposing (Html, div, text, span, pre)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, id)
+import Html.Events exposing (on, keyCode)
+import Json.Decode as Json
 import Keyboard
 import List exposing (..)
 import String exposing (..)
+import Task exposing (Task)
+import Dom
 
 -- MODEL
 
@@ -30,8 +33,6 @@ initialModel =
 type Msg
     = KeyPressedMsg Keyboard.KeyCode
     | KeyDownMsg Keyboard.KeyCode
-    -- cursor change (arrows)
-    -- 
 
 
 -- VIEW
@@ -51,12 +52,12 @@ cursorTop x =
 
 cursorLeft : Int -> String
 cursorLeft y =
-    toString (Basics.toFloat y * 7.20125) ++ "px"
+    toString (Basics.toFloat y * 7.8) ++ "px"
 
 view : Model -> Html Msg
 view model =
     pre [ class "pan" ]
-        [ div [ class "layer code-layer"] (List.map renderLine model.lines)
+        [ div [ class "layer code-layer" ] (List.map renderLine model.lines)
         , div
               [ class "layer cursor-layer"]
               [ div
@@ -159,7 +160,7 @@ right model =
             case nth x model.lines of
                 Nothing -> model.cursor
                 Just line ->
-                    if y + 1 < String.length line  then
+                    if y < String.length line  then
                         (x,y + 1)
                     else
                         model.cursor
@@ -197,5 +198,20 @@ subscriptions model =
 keyToString : Keyboard.KeyCode -> String
 keyToString keyCode =
     fromChar ( fromCode keyCode )
+
+offsetWidth : Json.Decoder Float
+offsetWidth =
+    Json.at ["target", "offsetWidth"] Json.float
+
+onKey : (Float -> msg) -> Html.Attribute msg
+onKey tagger =
+    on "keydown" (Json.map tagger offsetWidth)
+
+onKeyDown : (Int -> msg) -> Html.Attribute msg
+onKeyDown tagger =
+    on "keydown" (Json.map tagger Html.Events.keyCode)
+
+
+
 
 

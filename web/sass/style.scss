@@ -27,6 +27,8 @@ html, body {
 
 .line {
   color: #fafafa;
+  width: 16px;
+  line-height: 16px;
 }
 
 .layer {
@@ -41,7 +43,7 @@ html, body {
 }
 
 .code-layer {
-
+  font-family: monospace;
 }
 
 .cursor-layer {
@@ -54,4 +56,10 @@ html, body {
   position: absolute;
   border-left: 2px solid;
   border-color: green;
+}
+
+.measure {
+  position: absolute;
+  left: -100px;
+  padding: 0;
 }

@@ -17,6 +17,7 @@
 * [ ] shortcuts API
 * [ ] syntax highlighting
 * [ ] themes API
+* [ ] proper cursor placement
 * [ ] command line (commands API)
 * [ ] packages API (export as much internal things as pacakges as possible)
 * [ ] packages (themes, new features, etc)
