@@ -15,9 +15,9 @@ import Dom
 -- MODEL
 
 type alias Model =
-    -- split buffer into String array
     { lines: List String
     , cursor: (Int, Int)
+    , ctrl: Bool
     }
 
 initialModel : Model
@@ -27,20 +27,28 @@ initialModel =
           , "other stuff"
           ]
     , cursor = (0, 0)
+    , ctrl = False
     }
 
 -- MESSAGES
 type Msg
     = KeyPressedMsg Keyboard.KeyCode
     | KeyDownMsg Keyboard.KeyCode
+    | KeyUpMsg Keyboard.KeyCode
 
 
 -- VIEW
 
+emptyLineHelper : String -> String
+emptyLineHelper l =
+    case l of
+        "" -> " "
+        _ -> l
+
 renderLine : String -> Html a
 renderLine l =
     div [ class "line" ]
-        [ span [ ] [ text l ] ]
+        [ span [ ] [ text (emptyLineHelper l) ]]
 
 cursorToString : (Int, Int) -> String
 cursorToString (x, y)=
@@ -91,6 +99,10 @@ removeLast list =
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
     case message of
+        KeyDownMsg 17 ->
+            ( { model | ctrl = False }, Cmd.none)
+        KeyUpMsg 17 ->
+            ( { model | ctrl = True }, Cmd.none)
         KeyDownMsg 8 ->
             case model.lines of
                 [] ->
@@ -101,42 +113,60 @@ update message model =
                             case head (getLast lines) of
                                 Nothing -> []
                                 Just a ->
-                                    case log "last" dropRight 1 a of
+                                    case dropRight 1 a of
                                         "" -> []
                                         a -> [a]
 
                         lastLess = removeLast lines
                     in
                         ( { lines = lastLess ++ last
-                          -- cursor placement correction
-                          , cursor = model.cursor
+                          , cursor = left model
+                          , ctrl = model.ctrl
                           }
                         , Cmd.none
                         )
 
         KeyDownMsg 13 ->
-            ( { lines = model.lines ++ [""]
-              -- move cursor to next row
-              , cursor = down model
-              }
-            , Cmd.none
-            )
-
-        KeyPressedMsg keyCode ->
             let
-                string = keyToString keyCode
-                last =
-                    case head (getLast model.lines) of
-                        Nothing -> ""
-                        Just a -> a
-                lastLess = removeLast model.lines
+                x = fst model.cursor
+                y = snd model.cursor
+                front = log "front" (List.take x model.lines)
+                back = log "back" (List.drop (x + 1) model.lines)
+                middle =
+                    case nth x model.lines of
+                        Nothing -> []
+                        Just a ->
+                            String.lines (changeElement a y "\n")
             in
-                ( { lines = lastLess ++ [(last ++ string)]
-                  -- move cursor to right by one char
-                  , cursor = right model
+                ( { lines = front ++ middle ++ back
+                  , cursor = log "cursor" (x + 1, 0)
+                  , ctrl = model.ctrl
                   }
                 , Cmd.none
                 )
+
+        KeyPressedMsg keyCode ->
+            case model.ctrl of
+                True ->
+                    ( model , Cmd.none )
+                False ->
+                    let
+                        string = keyToString keyCode
+                        x = fst model.cursor
+                        y = snd model.cursor
+                        front = List.take x model.lines
+                        middle =
+                            case nth x model.lines of
+                                Nothing -> []
+                                Just a -> [(changeElement a y string)]
+                        back = List.drop (x + 1) model.lines
+                    in
+                        ( { lines = front ++ middle ++ back
+                          , cursor = right model
+                          , ctrl = model.ctrl
+                          }
+                        , Cmd.none
+                        )
 
         KeyDownMsg keyCode ->
             case keyCode of
@@ -152,6 +182,18 @@ update message model =
                     ( { model | cursor = down model }, Cmd.none)
                 _ ->
                     ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+changeElement : String -> Int -> String -> String
+changeElement base n addition =
+    let
+        len = String.length base
+        left = String.left n base
+        right = String.dropLeft n base
+    in
+        left ++ addition ++ right
 
 
 left : Model -> (Int, Int)
@@ -217,6 +259,7 @@ subscriptions model =
     Sub.batch
         [ Keyboard.presses KeyPressedMsg
         , Keyboard.downs KeyDownMsg
+        , Keyboard.ups KeyUpMsg
         ]
 
 keyToString : Keyboard.KeyCode -> String
