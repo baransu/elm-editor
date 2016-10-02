@@ -60,7 +60,7 @@ cursorTop x =
 
 cursorLeft : Int -> String
 cursorLeft y =
-    toString (Basics.toFloat (log "y" y) * 7.8) ++ "px"
+    toString (Basics.toFloat y * 7.8) ++ "px"
 
 view : Model -> Html Msg
 view model =
@@ -72,7 +72,7 @@ view model =
                 [ class "cursor"
                 , style
                       [ ("top", cursorTop (fst model.cursor) )
-                      , ("left", cursorLeft (snd (log "cursor" model.cursor)) )
+                      , ("left", cursorLeft (snd model.cursor) )
                       ]
                 ] []
               ]
@@ -113,19 +113,37 @@ update message model =
                     let
                         x = fst model.cursor
                         y = snd model.cursor
-                        front = List.take x model.lines
-                        back = List.drop (x + 1) model.lines
                         middle =
                             case nth x model.lines of
-                                Nothing -> []
-                                Just a ->
-                                    case deleteCharFromString a y of
-                                        "" -> []
-                                        a -> [a]
-                        lines = front ++ middle ++ back
+                                Nothing -> ""
+                                Just a -> deleteCharFromString a y
+
+                        front =
+                            let
+                                f = List.take x model.lines
+                                last =
+                                    case head (getLast f) of
+                                        Nothing -> []
+                                        Just a -> [(a ++ middle)]
+                            in
+                                case model.cursor of
+                                    (0,0) -> f ++ [middle]
+                                    (x,0) -> (removeLast f) ++ last
+                                    _ -> f ++ [middle]
+
+                        back = List.drop (x + 1) model.lines
+                        lines = front ++ back
                         cursor =
-                            case middle of
-                                [] -> (fst (up model), snd (left model))
+                            case model.cursor of
+                                (0, 0) -> model.cursor
+                                (x,0) ->
+                                    case nth (x - 1) front of
+                                        Nothing -> model.cursor
+                                        Just a ->
+                                            let
+                                                y = (String.length a) - (String.length middle)
+                                            in
+                                                (x - 1, y)
                                 _ -> left model
                     in
                         ( { model |
@@ -166,7 +184,7 @@ update message model =
                             _ ->
                                 ( { model |
                                         lines = lines,
-                                        cursor = right model
+                                        cursor = (x, y + 1)
                                   }
                                 , Cmd.none
                                 )

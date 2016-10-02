@@ -5,8 +5,8 @@
 * [ ] basic text edit
   * [x] insert 
   * [x] concept of cursor
-  * [ ] cursor based insert
-  * [ ] cursor based delete
+  * [x] cursor based insert
+  * [x] cursor based delete
   * [ ] indent(hard, soft tabs)
   * [ ] text selection
   * [ ] copy
