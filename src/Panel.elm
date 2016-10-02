@@ -60,7 +60,7 @@ cursorTop x =
 
 cursorLeft : Int -> String
 cursorLeft y =
-    toString (Basics.toFloat y * 7.8) ++ "px"
+    toString (Basics.toFloat (log "y" y) * 7.8) ++ "px"
 
 view : Model -> Html Msg
 view model =
@@ -72,7 +72,7 @@ view model =
                 [ class "cursor"
                 , style
                       [ ("top", cursorTop (fst model.cursor) )
-                      , ("left", cursorLeft (snd model.cursor) )
+                      , ("left", cursorLeft (snd (log "cursor" model.cursor)) )
                       ]
                 ] []
               ]
@@ -101,8 +101,10 @@ update message model =
     case message of
         KeyDownMsg 17 ->
             ( { model | ctrl = False }, Cmd.none)
+
         KeyUpMsg 17 ->
             ( { model | ctrl = True }, Cmd.none)
+
         KeyDownMsg 8 ->
             case model.lines of
                 [] ->
@@ -119,31 +121,12 @@ update message model =
 
                         lastLess = removeLast lines
                     in
-                        ( { lines = lastLess ++ last
-                          , cursor = left model
-                          , ctrl = model.ctrl
+                        ( { model |
+                                lines = lastLess ++ last,
+                                cursor = left model
                           }
                         , Cmd.none
                         )
-
-        KeyDownMsg 13 ->
-            let
-                x = fst model.cursor
-                y = snd model.cursor
-                front = log "front" (List.take x model.lines)
-                back = log "back" (List.drop (x + 1) model.lines)
-                middle =
-                    case nth x model.lines of
-                        Nothing -> []
-                        Just a ->
-                            String.lines (changeElement a y "\n")
-            in
-                ( { lines = front ++ middle ++ back
-                  , cursor = log "cursor" (x + 1, 0)
-                  , ctrl = model.ctrl
-                  }
-                , Cmd.none
-                )
 
         KeyPressedMsg keyCode ->
             case model.ctrl of
@@ -155,18 +138,31 @@ update message model =
                         x = fst model.cursor
                         y = snd model.cursor
                         front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
                         middle =
                             case nth x model.lines of
                                 Nothing -> []
-                                Just a -> [(changeElement a y string)]
-                        back = List.drop (x + 1) model.lines
+                                Just a ->
+                                    case keyCode of
+                                        13 -> String.lines (changeElement a y string)
+                                        _ -> [changeElement a y string]
+                        lines = front ++ middle ++ back
                     in
-                        ( { lines = front ++ middle ++ back
-                          , cursor = right model
-                          , ctrl = model.ctrl
-                          }
-                        , Cmd.none
-                        )
+                        case keyCode of
+                            13 ->
+                                ( { model |
+                                        lines = lines,
+                                        cursor = (x + 1, 0)
+                                  }
+                                , Cmd.none
+                                )
+                            _ ->
+                                ( { model |
+                                        lines = lines,
+                                        cursor = right model
+                                  }
+                                , Cmd.none
+                                )
 
         KeyDownMsg keyCode ->
             case keyCode of
