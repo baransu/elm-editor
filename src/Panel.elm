@@ -111,19 +111,26 @@ update message model =
                     ( model, Cmd.none )
                 lines ->
                     let
-                        last =
-                            case head (getLast lines) of
+                        x = fst model.cursor
+                        y = snd model.cursor
+                        front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
+                        middle =
+                            case nth x model.lines of
                                 Nothing -> []
                                 Just a ->
-                                    case dropRight 1 a of
+                                    case deleteCharFromString a y of
                                         "" -> []
                                         a -> [a]
-
-                        lastLess = removeLast lines
+                        lines = front ++ middle ++ back
+                        cursor =
+                            case middle of
+                                [] -> (fst (up model), snd (left model))
+                                _ -> left model
                     in
                         ( { model |
-                                lines = lastLess ++ last,
-                                cursor = left model
+                                lines = lines,
+                                cursor = cursor
                           }
                         , Cmd.none
                         )
@@ -182,15 +189,21 @@ update message model =
         _ ->
             ( model, Cmd.none )
 
+deleteCharFromString : String -> Int -> String
+deleteCharFromString base n =
+    let
+        left = String.left n base
+        right = String.dropLeft n base
+    in
+        (String.dropRight 1 left) ++ right
+
 changeElement : String -> Int -> String -> String
 changeElement base n addition =
     let
-        len = String.length base
         left = String.left n base
         right = String.dropLeft n base
     in
         left ++ addition ++ right
-
 
 left : Model -> (Int, Int)
 left model =
