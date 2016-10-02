@@ -37,6 +37,9 @@ type Msg
     | KeyUpMsg Keyboard.KeyCode
 
 
+type Tab = Soft Int | Hard
+
+tab = Soft 2
 -- VIEW
 
 emptyLineHelper : String -> String
@@ -159,7 +162,7 @@ update message model =
                     ( model , Cmd.none )
                 False ->
                     let
-                        string = keyToString keyCode
+                        string = log "char" (keyToString keyCode)
                         x = fst model.cursor
                         y = snd model.cursor
                         front = List.take x model.lines
@@ -173,7 +176,7 @@ update message model =
                                         _ -> [changeElement a y string]
                         lines = front ++ middle ++ back
                     in
-                        case keyCode of
+                        case log "keyCode" keyCode of
                             13 ->
                                 ( { model |
                                         lines = lines,
@@ -191,6 +194,33 @@ update message model =
 
         KeyDownMsg keyCode ->
             case keyCode of
+                -- tab
+                9 ->
+                    let
+                        tabSize =
+                            case tab of
+                                Hard -> 1
+                                Soft a -> a
+                        string =
+                            case tab of
+                                Hard -> "\t"
+                                Soft a -> String.repeat a " "
+                        x = fst model.cursor
+                        y = snd model.cursor
+                        front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
+                        middle =
+                            case nth x model.lines of
+                                Nothing -> []
+                                Just a -> [string ++ a]
+                        lines = front ++ middle ++ back
+                    in
+                        ( { model |
+                                lines = lines,
+                                cursor = (x, y + tabSize)
+                          }
+                        , Cmd.none
+                        )
                 -- left/right
                 37 ->
                     ( { model | cursor = left model }, Cmd.none)
