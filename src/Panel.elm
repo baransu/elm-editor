@@ -104,19 +104,20 @@ removeLast list =
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
     case message of
+        -- modifiers ctrl/shift
         KeyDownMsg 17 ->
-            ( { model | ctrl = False }, Cmd.none)
-
-        KeyUpMsg 17 ->
             ( { model | ctrl = True }, Cmd.none)
 
+        KeyUpMsg 17 ->
+            ( { model | ctrl = False }, Cmd.none)
 
-        -- KeyDownMsg 17 ->
-        --     ( { model | shift = False }, Cmd.none)
+        KeyDownMsg 16 ->
+            ( { model | shift = True }, Cmd.none)
 
-        -- KeyUpMsg 17 ->
-        --     ( { model | shift = True }, Cmd.none)
+        KeyUpMsg 16 ->
+            ( { model | shift = False }, Cmd.none)
 
+        -- backspace
         KeyDownMsg 8 ->
             case model.lines of
                 [] ->
@@ -165,6 +166,7 @@ update message model =
                         , Cmd.none
                         )
 
+        -- char insert
         KeyPressedMsg keyCode ->
             case model.ctrl of
                 True ->
@@ -186,6 +188,7 @@ update message model =
                         lines = front ++ middle ++ back
                     in
                         case keyCode of
+                            -- is enter
                             13 ->
                                 ( { model |
                                         lines = lines,
@@ -193,6 +196,7 @@ update message model =
                                   }
                                 , Cmd.none
                                 )
+                            -- else
                             _ ->
                                 ( { model |
                                         lines = lines,
@@ -201,32 +205,42 @@ update message model =
                                 , Cmd.none
                                 )
 
+        -- handle other keys like arrows/tab
         KeyDownMsg keyCode ->
-            case log "keyCode" keyCode of
+            case  keyCode of
                 -- tab
                 9 ->
                     let
-                        tabSize =
+                        y =
                             case tab of
                                 Hard -> 1
-                                Soft a -> a
+                                Soft a ->
+                                    case model.shift of
+                                        False -> snd model.cursor + a
+                                        True ->
+                                            if snd model.cursor - a <= 0 then
+                                                0
+                                            else
+                                                snd model.cursor - a
                         string =
                             case tab of
                                 Hard -> "\t"
                                 Soft a -> String.repeat a " "
                         x = fst model.cursor
-                        y = snd model.cursor
                         front = List.take x model.lines
                         back = List.drop (x + 1) model.lines
                         middle =
                             case nth x model.lines of
                                 Nothing -> []
-                                Just a -> [string ++ a]
+                                Just a ->
+                                    case model.shift of
+                                        True -> [dropTab a]
+                                        False -> [string ++ a]
                         lines = front ++ middle ++ back
                     in
                         ( { model |
                                 lines = lines,
-                                cursor = (x, y + tabSize)
+                                cursor = (x, y)
                           }
                         , Cmd.none
                         )
@@ -245,6 +259,21 @@ update message model =
 
         _ ->
             ( model, Cmd.none )
+
+
+dropTab : String -> String
+dropTab line =
+    let
+        size =
+            case tab of
+                Soft a -> a
+                Hard -> 0
+        string = String.repeat size " "
+    in
+        if String.left size line == string then
+            String.dropLeft size line
+        else
+            line
 
 deleteCharFromString : String -> Int -> String
 deleteCharFromString base n =
