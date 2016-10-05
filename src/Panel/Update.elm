@@ -1,89 +1,19 @@
-module Panel exposing (..)
+module Panel.Update exposing (..)
 
-import Char exposing (..)
-import Debug exposing (..)
-import Html exposing (Html, div, text, span, pre)
-import Html.Attributes exposing (class, style, id)
-import Html.Events exposing (on, keyCode)
-import Json.Decode as Json
-import Keyboard
-import List exposing (..)
 import String exposing (..)
-import Task exposing (Task)
-import Dom
+import List exposing (..)
+import Keyboard
+import Char exposing (..)
 
--- MODEL
-
-type alias Model =
-    { lines: List String
-    , cursor: (Int, Int)
-    , ctrl: Bool
-    , shift: Bool
-    }
-
-initialModel : Model
-initialModel =
-    { lines =
-          [ "bello world iasjdlasjdlkajdlkajsdlksj"
-          , "other stuff"
-          ]
-    , cursor = (0, 0)
-    , ctrl = False
-    , shift = False
-    }
-
--- MESSAGES
-type Msg
-    = KeyPressedMsg Keyboard.KeyCode
-    | KeyDownMsg Keyboard.KeyCode
-    | KeyUpMsg Keyboard.KeyCode
-
-
-type Tab = Soft Int | Hard
-
-tab = Soft 2
--- VIEW
-
-emptyLineHelper : String -> String
-emptyLineHelper l =
-    case l of
-        "" -> " "
-        _ -> l
-
-renderLine : String -> Html a
-renderLine l =
-    div [ class "line" ]
-        [ span [ ] [ text (emptyLineHelper l) ]]
-
-cursorToString : (Int, Int) -> String
-cursorToString (x, y)=
-    toString x ++ " | " ++ toString y
-
-cursorTop : Int -> String
-cursorTop x =
-    toString (Basics.toFloat x * 16) ++ "px"
-
-cursorLeft : Int -> String
-cursorLeft y =
-    toString (Basics.toFloat y * 7.8) ++ "px"
-
-view : Model -> Html Msg
-view model =
-    pre [ class "pan" ]
-        [ div [ class "layer code-layer" ] (List.map renderLine model.lines)
-        , div
-              [ class "layer cursor-layer"]
-              [ div
-                [ class "cursor"
-                , style
-                      [ ("top", cursorTop (fst model.cursor) )
-                      , ("left", cursorLeft (snd model.cursor) )
-                      ]
-                ] []
-              ]
-        ]
+import Panel.Model exposing (..)
+import Panel.Messages exposing (..)
 
 -- UPDATE
+
+keyToString : Keyboard.KeyCode -> String
+keyToString keyCode =
+    fromChar ( fromCode keyCode )
+
 
 getLast : List a -> List a
 getLast list =
@@ -94,12 +24,14 @@ getLast list =
                 Nothing -> []
                 Just a -> [a]
 
+
 removeLast : List a -> List a
 removeLast list =
     case list of
         [] -> []
         l ->
             List.reverse (drop 1 (List.reverse l))
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
@@ -166,6 +98,59 @@ update message model =
                         , Cmd.none
                         )
 
+        -- handle other keys like arrows/tab
+        KeyDownMsg keyCode ->
+            case  keyCode of
+                -- tab
+                9 ->
+                    let
+                        y =
+                            case model.tab of
+                                Hard -> 1
+                                Soft a ->
+                                    case model.shift of
+                                        False -> snd model.cursor + a
+                                        True ->
+                                            if snd model.cursor - a <= 0 then
+                                                0
+                                            else
+                                                snd model.cursor - a
+                        string =
+                            case model.tab of
+                                Hard -> "\t"
+                                Soft a -> String.repeat a " "
+                        x = fst model.cursor
+                        front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
+                        middle =
+                            case nth x model.lines of
+                                Nothing -> []
+                                Just a ->
+                                    case model.shift of
+                                        True -> [dropTab model.tab a]
+                                        False -> [string ++ a]
+                        lines = front ++ middle ++ back
+                    in
+                        ( { model |
+                                lines = lines,
+                                cursor = (x, y)
+                          }
+                        , Cmd.none
+                        )
+                -- left/right
+                37 ->
+                    ( { model | cursor = left model }, Cmd.none)
+                39 ->
+                    ( { model | cursor = right model }, Cmd.none)
+                -- up/down
+                38 ->
+                    ( { model | cursor = up model }, Cmd.none)
+                40 ->
+                    ( { model | cursor = down model }, Cmd.none)
+                _ ->
+                    ( model, Cmd.none )
+
+
         -- char insert
         KeyPressedMsg keyCode ->
             case model.ctrl of
@@ -205,64 +190,12 @@ update message model =
                                 , Cmd.none
                                 )
 
-        -- handle other keys like arrows/tab
-        KeyDownMsg keyCode ->
-            case  keyCode of
-                -- tab
-                9 ->
-                    let
-                        y =
-                            case tab of
-                                Hard -> 1
-                                Soft a ->
-                                    case model.shift of
-                                        False -> snd model.cursor + a
-                                        True ->
-                                            if snd model.cursor - a <= 0 then
-                                                0
-                                            else
-                                                snd model.cursor - a
-                        string =
-                            case tab of
-                                Hard -> "\t"
-                                Soft a -> String.repeat a " "
-                        x = fst model.cursor
-                        front = List.take x model.lines
-                        back = List.drop (x + 1) model.lines
-                        middle =
-                            case nth x model.lines of
-                                Nothing -> []
-                                Just a ->
-                                    case model.shift of
-                                        True -> [dropTab a]
-                                        False -> [string ++ a]
-                        lines = front ++ middle ++ back
-                    in
-                        ( { model |
-                                lines = lines,
-                                cursor = (x, y)
-                          }
-                        , Cmd.none
-                        )
-                -- left/right
-                37 ->
-                    ( { model | cursor = left model }, Cmd.none)
-                39 ->
-                    ( { model | cursor = right model }, Cmd.none)
-                -- up/down
-                38 ->
-                    ( { model | cursor = up model }, Cmd.none)
-                40 ->
-                    ( { model | cursor = down model }, Cmd.none)
-                _ ->
-                    ( model, Cmd.none )
-
         _ ->
             ( model, Cmd.none )
 
 
-dropTab : String -> String
-dropTab line =
+dropTab : Tab -> String -> String
+dropTab tab line =
     let
         size =
             case tab of
@@ -275,6 +208,7 @@ dropTab line =
         else
             line
 
+
 deleteCharFromString : String -> Int -> String
 deleteCharFromString base n =
     let
@@ -282,6 +216,7 @@ deleteCharFromString base n =
         right = String.dropLeft n base
     in
         (String.dropRight 1 left) ++ right
+
 
 changeElement : String -> Int -> String -> String
 changeElement base n addition =
@@ -291,11 +226,6 @@ changeElement base n addition =
     in
         left ++ addition ++ right
 
-left : Model -> (Int, Int)
-left model =
-    case model.cursor of
-        (_,0) -> model.cursor
-        (x,y) -> (x,y - 1)
 
 nth : Int -> List a -> Maybe a
 nth n xs =
@@ -304,6 +234,14 @@ nth n xs =
         case drop n xs of
             [] -> Nothing
             x::_ -> Just x
+
+
+left : Model -> (Int, Int)
+left model =
+    case model.cursor of
+        (_,0) -> model.cursor
+        (x,y) -> (x,y - 1)
+
 
 right : Model -> (Int, Int)
 right model =
@@ -318,12 +256,33 @@ right model =
                         model.cursor
 
 
+getLineLength : (Int, Int) -> Int -> List String -> Int
+getLineLength (x, y) modifier lines =
+    case nth (x + modifier) lines of
+        Nothing -> y
+        Just line ->
+            let
+                len = String.length line
+            in
+                if y < len then
+                    y
+                else
+                    len
+
 up : Model -> (Int, Int)
 up model =
     case model.cursor of
         (0,_) -> model.cursor
-        -- calculate y if lines if shorter than previous line
-        (x,y) -> (x - 1,y)
+        (x,y) ->
+            let
+                lines = List.length model.lines
+                lineLength = getLineLength model.cursor (-1) model.lines
+            in
+                if x - 1 < lines then
+                    (x - 1, lineLength)
+                else
+                    (x - 1,y)
+
 
 down : Model -> (Int, Int)
 down model =
@@ -331,49 +290,10 @@ down model =
         (x,y) ->
             let
                 lines = List.length model.lines
-                lineLength =
-                    case nth (x + 1) model.lines of
-                        Nothing -> y
-                        Just line ->
-                            let
-                                len = String.length line
-                            in
-                                if y < len then
-                                    y
-                                else
-                                    len
+                lineLength = getLineLength model.cursor 1 model.lines
             in
                 if x + 1 < lines then
                     (x + 1,lineLength)
                 else
                     model.cursor
-
--- SUBSCRIPTIONS
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ Keyboard.presses KeyPressedMsg
-        , Keyboard.downs KeyDownMsg
-        , Keyboard.ups KeyUpMsg
-        ]
-
-keyToString : Keyboard.KeyCode -> String
-keyToString keyCode =
-    fromChar ( fromCode keyCode )
-
-offsetWidth : Json.Decoder Float
-offsetWidth =
-    Json.at ["target", "offsetWidth"] Json.float
-
-onKey : (Float -> msg) -> Html.Attribute msg
-onKey tagger =
-    on "keydown" (Json.map tagger offsetWidth)
-
-onKeyDown : (Int -> msg) -> Html.Attribute msg
-onKeyDown tagger =
-    on "keydown" (Json.map tagger Html.Events.keyCode)
-
-
-
-
 

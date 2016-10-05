@@ -1,20 +1,23 @@
 module Main exposing (..)
 
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (..)
 import Html.App
-import Panel exposing (..)
+import Html.Attributes exposing (..)
+import Panel.Model exposing (..)
+import Panel.Messages exposing (..)
+import Panel.Subscriptions exposing (..)
+import Panel.Update exposing (..)
+import Panel.View exposing (..)
 
 
 -- MODEL
 
--- split panel into array of panels
 type alias Model =
-    { panelModel: Panel.Model }
+    { panelModel: Panel.Model.Model }
 
 init : ( Model, Cmd Msg )
 init =
-    ({ panelModel = Panel.initialModel
+    ({ panelModel = Panel.Model.initialModel
      }
     , Cmd.none
     )
@@ -23,7 +26,7 @@ init =
 -- MESSAGES
 
 type Msg
-    = PanelMsg Panel.Msg
+    = PanelMsg Panel.Messages.Msg
 
 
 -- VIEW
@@ -31,7 +34,7 @@ type Msg
 view : Model -> Html Msg
 view model =
     div [ class "application" ]
-        [ Html.App.map PanelMsg (Panel.view model.panelModel) ]
+        [ Html.App.map PanelMsg (Panel.View.view model.panelModel) ]
 
 
 -- UPDATE
@@ -42,7 +45,7 @@ update msg model =
         PanelMsg subMsg ->
             let
                 ( updatePanelModel, panelCmd ) =
-                    Panel.update subMsg model.panelModel
+                    Panel.Update.update subMsg model.panelModel
             in
                 ({ model | panelModel = updatePanelModel }
                 , Cmd.map PanelMsg panelCmd
@@ -53,7 +56,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map PanelMsg ( Panel.subscriptions model.panelModel )
+    Sub.map PanelMsg ( Panel.Subscriptions.subscriptions model.panelModel )
 
 
 -- MAIN
