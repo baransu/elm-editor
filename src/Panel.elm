@@ -18,6 +18,7 @@ type alias Model =
     { lines: List String
     , cursor: (Int, Int)
     , ctrl: Bool
+    , shift: Bool
     }
 
 initialModel : Model
@@ -28,6 +29,7 @@ initialModel =
           ]
     , cursor = (0, 0)
     , ctrl = False
+    , shift = False
     }
 
 -- MESSAGES
@@ -108,6 +110,13 @@ update message model =
         KeyUpMsg 17 ->
             ( { model | ctrl = True }, Cmd.none)
 
+
+        -- KeyDownMsg 17 ->
+        --     ( { model | shift = False }, Cmd.none)
+
+        -- KeyUpMsg 17 ->
+        --     ( { model | shift = True }, Cmd.none)
+
         KeyDownMsg 8 ->
             case model.lines of
                 [] ->
@@ -162,7 +171,7 @@ update message model =
                     ( model , Cmd.none )
                 False ->
                     let
-                        string = log "char" (keyToString keyCode)
+                        string = keyToString keyCode
                         x = fst model.cursor
                         y = snd model.cursor
                         front = List.take x model.lines
@@ -176,7 +185,7 @@ update message model =
                                         _ -> [changeElement a y string]
                         lines = front ++ middle ++ back
                     in
-                        case log "keyCode" keyCode of
+                        case keyCode of
                             13 ->
                                 ( { model |
                                         lines = lines,
@@ -193,7 +202,7 @@ update message model =
                                 )
 
         KeyDownMsg keyCode ->
-            case keyCode of
+            case log "keyCode" keyCode of
                 -- tab
                 9 ->
                     let

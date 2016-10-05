@@ -8,11 +8,9 @@
   * [x] cursor based insert
   * [x] cursor based delete
   * [x] soft tab
-  * [ ] shift, alt modifiers
   * [ ] text selection
   * [ ] copy
   * [ ] paste
-  * [ ] hard tab
 * [ ] command line (front/back end commands)
 * [ ] file managment
   * [ ] open
