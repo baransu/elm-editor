@@ -10,10 +10,25 @@ import Panel.Messages exposing (..)
 
 -- UPDATE
 
+
+-- utils
+
 keyToString : Keyboard.KeyCode -> String
 keyToString keyCode =
     fromChar ( fromCode keyCode )
 
+
+nth : Int -> List a -> Maybe a
+nth n xs =
+    if n < 0 then
+        Nothing
+    else
+        case drop n xs of
+            [] -> Nothing
+            x::_ -> Just x
+
+
+-- other
 
 getLast : List a -> List a
 getLast list =
@@ -226,14 +241,20 @@ changeElement base n addition =
     in
         left ++ addition ++ right
 
+-- move cursor
 
-nth : Int -> List a -> Maybe a
-nth n xs =
-    if n < 0 then Nothing
-    else
-        case drop n xs of
-            [] -> Nothing
-            x::_ -> Just x
+getLineLength : (Int, Int) -> Int -> List String -> Int
+getLineLength (x, y) modifier lines =
+    case nth (x + modifier) lines of
+        Nothing -> y
+        Just line ->
+            let
+                len = String.length line
+            in
+                if y < len then
+                    y
+                else
+                    len
 
 
 left : Model -> (Int, Int)
@@ -255,19 +276,6 @@ right model =
                     else
                         model.cursor
 
-
-getLineLength : (Int, Int) -> Int -> List String -> Int
-getLineLength (x, y) modifier lines =
-    case nth (x + modifier) lines of
-        Nothing -> y
-        Just line ->
-            let
-                len = String.length line
-            in
-                if y < len then
-                    y
-                else
-                    len
 
 up : Model -> (Int, Int)
 up model =
