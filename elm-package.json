@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "0.0.1",
     "summary": "Text editor written in Elm on top of Electron",
     "repository": "https://github.com/Baransu/elm-editor.git",
     "license": "MIT",

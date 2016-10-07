@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Html exposing (Html, div, text)
 import Html.App
@@ -56,8 +56,9 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map PanelMsg ( Panel.Subscriptions.subscriptions model.panelModel )
-
+    Sub.batch
+        [ Sub.map PanelMsg ( Panel.Subscriptions.subscriptions model.panelModel )
+        ]
 
 -- MAIN
 
@@ -69,3 +70,4 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+

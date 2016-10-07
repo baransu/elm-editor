@@ -25,6 +25,11 @@ gulp.task('sass', function() {
     .pipe(gulp.dest(config.dest + '/css'));
 });
 
+gulp.task('js', function() {
+  return gulp.src(['./web/ports.js'])
+    .pipe(gulp.dest(config.dest + '/js'));
+});
+
 gulp.task('html', function() {
   return gulp.src(['./web/index.html'])
     .pipe(gulp.dest(config.dest));
@@ -45,7 +50,11 @@ gulp.task('clean', function () {
 });
 
 gulp.task('default', gulpSequesnce([
-  'clean', 'bower'
+  'clean',
+  'bower'
 ], [
-  'icons','html', 'sass'
+  'js',
+  'icons',
+  'html',
+  'sass'
 ]));

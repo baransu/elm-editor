@@ -1,15 +1,15 @@
-module Panel.Update exposing (..)
+port module Panel.Update exposing (..)
 
-import String exposing (..)
-import List exposing (..)
-import Keyboard
 import Char exposing (..)
-
-import Panel.Model exposing (..)
+import Debug exposing (..)
+import Keyboard
+import List exposing (..)
 import Panel.Messages exposing (..)
+import Panel.Model exposing (..)
+import String exposing (..)
+
 
 -- UPDATE
-
 
 -- utils
 
@@ -205,6 +205,17 @@ update message model =
                                 , Cmd.none
                                 )
 
+
+        OpenFile file ->
+            let
+                lines = String.lines file
+            in
+                ( { model |
+                        lines = lines,
+                        cursor = (0, 0)
+                  }
+                , Cmd.none
+                )
         _ ->
             ( model, Cmd.none )
 
@@ -305,3 +316,5 @@ down model =
                 else
                     model.cursor
 
+
+port command : String -> Cmd msg
