@@ -3,10 +3,10 @@ port module Panel.Update exposing (..)
 import Char exposing (..)
 import Debug exposing (..)
 import Keyboard
-import List exposing (..)
 import Panel.Messages exposing (..)
 import Panel.Model exposing (..)
 import String exposing (..)
+import List exposing (..)
 
 
 -- UPDATE
@@ -64,7 +64,7 @@ update message model =
         KeyUpMsg 16 ->
             ( { model | shift = False }, Cmd.none)
 
-        -- backspace
+        -- backspace aka remove char
         KeyDownMsg 8 ->
             case model.lines of
                 [] ->
@@ -76,7 +76,7 @@ update message model =
                         middle =
                             case nth x model.lines of
                                 Nothing -> ""
-                                Just a -> deleteCharFromString a y
+                                Just a -> deleteFromString a y
 
                         front =
                             let
@@ -130,10 +130,6 @@ update message model =
                                                 0
                                             else
                                                 snd model.cursor - a
-                        string =
-                            case model.tab of
-                                Hard -> "\t"
-                                Soft a -> String.repeat a " "
                         x = fst model.cursor
                         front = List.take x model.lines
                         back = List.drop (x + 1) model.lines
@@ -143,7 +139,7 @@ update message model =
                                 Just a ->
                                     case model.shift of
                                         True -> [dropTab model.tab a]
-                                        False -> [string ++ a]
+                                        False -> [addTab model.tab a]
                         lines = front ++ middle ++ back
                     in
                         ( { model |
@@ -173,37 +169,31 @@ update message model =
                     ( model , Cmd.none )
                 False ->
                     let
-                        string = keyToString keyCode
+                        char = keyToString keyCode
                         x = fst model.cursor
                         y = snd model.cursor
                         front = List.take x model.lines
                         back = List.drop (x + 1) model.lines
                         middle =
                             case nth x model.lines of
-                                Nothing -> []
-                                Just a ->
+                                Nothing -> [char]
+                                Just line ->
                                     case keyCode of
-                                        13 -> String.lines (changeElement a y string)
-                                        _ -> [changeElement a y string]
+                                        13 -> String.lines (addToString line y char)
+                                        _ -> [addToString line y char]
                         lines = front ++ middle ++ back
+                        cursor =
+                            case keyCode of
+                                13 -> (x + 1, 0)
+                                _ -> (x, y + 1)
+
                     in
-                        case keyCode of
-                            -- is enter
-                            13 ->
-                                ( { model |
-                                        lines = lines,
-                                        cursor = (x + 1, 0)
-                                  }
-                                , Cmd.none
-                                )
-                            -- else
-                            _ ->
-                                ( { model |
-                                        lines = lines,
-                                        cursor = (x, y + 1)
-                                  }
-                                , Cmd.none
-                                )
+                        ( { model |
+                                lines = lines,
+                                cursor = cursor
+                          }
+                        , Cmd.none
+                        )
 
 
         OpenFile file ->
@@ -234,9 +224,19 @@ dropTab tab line =
         else
             line
 
+addTab : Tab -> String -> String
+addTab tab line =
+    let
+        string =
+            case tab of
+                Hard -> ""
+                Soft a -> String.repeat a " "
+    in
+        string ++ line
 
-deleteCharFromString : String -> Int -> String
-deleteCharFromString base n =
+
+deleteFromString : String -> Int -> String
+deleteFromString base n =
     let
         left = String.left n base
         right = String.dropLeft n base
@@ -244,8 +244,8 @@ deleteCharFromString base n =
         (String.dropRight 1 left) ++ right
 
 
-changeElement : String -> Int -> String -> String
-changeElement base n addition =
+addToString : String -> Int -> String -> String
+addToString base n addition =
     let
         left = String.left n base
         right = String.dropLeft n base
