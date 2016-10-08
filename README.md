@@ -23,3 +23,16 @@
 * [ ] packages (themes, new features, etc)
 * [ ] package manager
 * [ ] more...
+
+## Building and running `elm-editor`
+
+```shell
+npm install
+make start
+````
+
+## Licence
+
+MIT License
+
+Copyright (c) 2016 Tomasz Cichocinski
