@@ -11,9 +11,9 @@
   * [ ] text selection
   * [ ] copy
   * [ ] paste
-* [ ] command line (front/back end commands)
+* [ ] command line API (open-buffer, save-buffer etc)
 * [ ] file managment
-  * [ ] open
+  * [x] basic file open
   * [ ] save
 * [ ] shortcuts API (shortcuts are interpreted in front and executed in backend as command if needed)
 * [ ] syntax highlighting
