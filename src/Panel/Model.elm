@@ -14,10 +14,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { lines =
-          [ "bello world iasjdlasjdlkajdlkajsdlksj"
-          , "other stuff"
-          ]
+    { lines = []
     , cursor = (0, 0)
     , ctrl = False
     , shift = False

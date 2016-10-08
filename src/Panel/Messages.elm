@@ -7,4 +7,5 @@ type Msg
     = KeyPressedMsg Keyboard.KeyCode
     | KeyDownMsg Keyboard.KeyCode
     | KeyUpMsg Keyboard.KeyCode
+    | OpenFile String
 

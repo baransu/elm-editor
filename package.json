@@ -1,6 +1,6 @@
 {
   "name": "elm-editor",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Text editor written in Elm on top of Electron",
   "main": "index.js",
   "scripts": {
