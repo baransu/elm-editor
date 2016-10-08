@@ -148,6 +148,28 @@ update message model =
                           }
                         , Cmd.none
                         )
+
+                -- explicit define space so it will not scroll page to bottom
+                32 ->
+                    let
+                        char = " "
+                        x = fst model.cursor
+                        y = snd model.cursor
+                        front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
+                        middle =
+                            case nth x model.lines of
+                                Nothing -> [char]
+                                Just line -> [addToString line y char]
+                        lines = front ++ middle ++ back
+                    in
+                        ( { model |
+                                lines = lines,
+                                cursor = (x,y + 1)
+                          }
+                        ,Cmd.none
+                        )
+
                 -- left/right
                 37 ->
                     ( { model | cursor = left model }, Cmd.none)
@@ -155,9 +177,9 @@ update message model =
                     ( { model | cursor = right model }, Cmd.none)
                 -- up/down
                 38 ->
-                    ( { model | cursor = up model }, Cmd.none)
+                    ( { model | cursor = up model }, command "core:line-up" )
                 40 ->
-                    ( { model | cursor = down model }, Cmd.none)
+                    ( { model | cursor = down model }, command "core:line-down" )
                 _ ->
                     ( model, Cmd.none )
 
@@ -318,3 +340,4 @@ down model =
 
 
 port command : String -> Cmd msg
+--port scroll : Int -> Cmd msg
