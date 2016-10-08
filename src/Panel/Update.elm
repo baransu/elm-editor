@@ -148,6 +148,28 @@ update message model =
                           }
                         , Cmd.none
                         )
+
+                -- explicit define space so it will not scroll page to bottom
+                32 ->
+                    let
+                        char = " "
+                        x = fst model.cursor
+                        y = snd model.cursor
+                        front = List.take x model.lines
+                        back = List.drop (x + 1) model.lines
+                        middle =
+                            case nth x model.lines of
+                                Nothing -> [char]
+                                Just line -> [addToString line y char]
+                        lines = front ++ middle ++ back
+                    in
+                        ( { model |
+                                lines = lines,
+                                cursor = (x,y + 1)
+                          }
+                        ,Cmd.none
+                        )
+
                 -- left/right
                 37 ->
                     ( { model | cursor = left model }, Cmd.none)
