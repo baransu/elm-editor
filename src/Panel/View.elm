@@ -41,12 +41,13 @@ cursorLeft y =
 
 view : Model -> Html Msg
 view model =
-    pre [ class "pan" ]
+    pre [ id "panel", class "pan" ]
         [ div [ class "layer code-layer" ] (List.map renderLine model.lines)
         , div
               [ class "layer cursor-layer"]
               [ div
                 [ class "cursor"
+                , id "cursor"
                 , style
                       [ ("top", cursorTop (fst model.cursor) )
                       , ("left", cursorLeft (snd model.cursor) )

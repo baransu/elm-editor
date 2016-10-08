@@ -177,9 +177,9 @@ update message model =
                     ( { model | cursor = right model }, Cmd.none)
                 -- up/down
                 38 ->
-                    ( { model | cursor = up model }, Cmd.none)
+                    ( { model | cursor = up model }, command "core:line-up" )
                 40 ->
-                    ( { model | cursor = down model }, Cmd.none)
+                    ( { model | cursor = down model }, command "core:line-down" )
                 _ ->
                     ( model, Cmd.none )
 
@@ -340,3 +340,4 @@ down model =
 
 
 port command : String -> Cmd msg
+--port scroll : Int -> Cmd msg
