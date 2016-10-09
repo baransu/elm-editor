@@ -230,6 +230,7 @@ update message model =
                 lines = String.lines file
             in
                 ( { model |
+                        selection = False,
                         lines = lines,
                         cursor = (0, 0)
                   }
