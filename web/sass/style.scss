@@ -50,12 +50,22 @@ html, body {
   z-index: 4
 }
 
+.selection-layer {
+  z-index: 4;
+}
+
 .cursor {
   width: 7.20125px;
   height: 16px;
   position: absolute;
   border-left: 2px solid;
   border-color: green;
+}
+
+.selection {
+  width: 100%;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 .measure {

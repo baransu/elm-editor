@@ -54,4 +54,14 @@ view model =
                       ]
                 ] []
               ]
+        , div
+            [ class "layer selection-layer" ]
+            [ div [ class "selection"
+                  , style
+                        [ ("top", cursorTop (min (fst model.cursor) (fst model.selectionStart)) )
+                        , ("height", cursorTop (abs ((fst model.cursor) - (fst model.selectionStart)) + 1) )
+                        , ("visibility", if model.selection then "visible" else "hidden" )
+                        ]
+                  ] []
+            ]
         ]

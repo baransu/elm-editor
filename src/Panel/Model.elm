@@ -4,11 +4,13 @@ module Panel.Model exposing (..)
 type Tab = Soft Int | Hard
 
 type alias Model =
-    { lines: List String
-    , cursor: (Int, Int)
-    , ctrl: Bool
-    , shift: Bool
+    { lines : List String
+    , cursor : (Int, Int)
+    , ctrl : Bool
+    , shift : Bool
     , tab : Tab
+    , selection : Bool
+    , selectionStart : (Int, Int)
     }
 
 
@@ -19,4 +21,6 @@ initialModel =
     , ctrl = False
     , shift = False
     , tab = Soft 2
+    , selection = False
+    , selectionStart = (0, 0)
     }
