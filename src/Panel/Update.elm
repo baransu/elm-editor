@@ -172,7 +172,7 @@ update message model =
                                 lines = lines,
                                 cursor = (x,y + 1)
                           }
-                        ,Cmd.none )
+                        , Cmd.none )
 
                 -- escape remove selectioh
 
@@ -217,6 +217,7 @@ update message model =
 
                     in
                         ( { model |
+                                shift = False,
                                 selection = False,
                                 lines = lines,
                                 cursor = cursor
