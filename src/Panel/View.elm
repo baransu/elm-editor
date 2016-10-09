@@ -51,49 +51,33 @@ selectionBlock width height left top =
         ] []
 
 selection : Model -> List (Html a)
-selection model =
+selection { cursor, selectionStart } =
     let
-        top = min (fst model.cursor) (fst model.selectionStart)
+        ( cursorX, cursorY ) = cursor
+        ( startX, startY ) = selectionStart
+        top = min cursorX startX
         showEnd = linesCount - 1 >= 0
-        topLeft =
+        bottom = max cursorX startX
+        linesCount = abs ( cursorX - startX )
+        ( topLeft, bottomWidth ) =
             if not showEnd then
-                min (snd model.cursor) (snd model.selectionStart)
-
-            else if fst model.cursor < fst model.selectionStart then
-                snd model.cursor
-
+                ( min cursorY startY, abs ( cursorY - startY ) )
+            else if cursorX < startX then
+                ( cursorY, startY )
             else
-                snd model.selectionStart
+                ( startY, cursorY )
 
-        bottomWidth =
-            if not showEnd then
-                abs ((snd model.cursor) - (snd model.selectionStart))
-
-            else if fst model.cursor > fst model.selectionStart then
-                snd model.cursor
-
-            else
-                snd model.selectionStart
-
-
-        bottom = max (fst model.cursor) (fst model.selectionStart)
-        linesCount = abs ((fst model.cursor) - (fst model.selectionStart))
-        begin =
+        ( begin, middle, end )  =
             if showEnd then
-                [selectionBlock (100, "%") (16.0, "px") topLeft top]
+                ( [selectionBlock (100, "%") (16.0, "px") topLeft top]
+                , [selectionBlock (100, "%") (Basics.toFloat (linesCount - 1) * 16, "px") 0 (top + 1)]
+                , [selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") 0 bottom]
+                )
             else
-                [selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") topLeft top]
-
-        middle =
-            if showEnd then
-                [selectionBlock (100, "%") (Basics.toFloat (linesCount - 1) * 16, "px") 0 (top + 1)]
-            else
-                [ ]
-        end =
-            if showEnd then
-                [selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") 0 bottom]
-            else
-                [ ]
+                ( [selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") topLeft top]
+                , [ ]
+                , [ ]
+                )
 
     in
         begin ++ middle ++ end
