@@ -9,17 +9,22 @@
   * [x] cursor based delete
   * [x] soft tab
   * [ ] text selection
-  * [ ] copy
-  * [ ] paste
-* [ ] command line API (open-buffer, save-buffer etc)
+  * [ ] selection based delete
+  * [ ] selection based insert (replace)
+* [ ] copy
+* [ ] paste
+* [ ] line numbers
+* [ ] line wraping
+* [ ] commands (all major things within editor are executed as commands)
+* [ ] custom commands APO
 * [ ] file managment
   * [x] basic file open
   * [ ] save
-* [ ] shortcuts API (shortcuts are interpreted in front and executed in backend as command if needed)
+* [ ] shortcuts API (atom-mode(normal shortcuts)/emacs-mode)
 * [ ] syntax highlighting
-* [ ] themes API
-* [ ] proper cursor placement
-* [ ] packages API (export as much internal things as pacakges as possible)
+* [ ] themes API (both syntax and cursor)
+* [ ] proper cursor placement (calc text next char size and based on that move cursor)
+* [ ] packages API
 * [ ] packages (themes, new features, etc)
 * [ ] package manager
 * [ ] more...

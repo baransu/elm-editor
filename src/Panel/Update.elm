@@ -15,8 +15,9 @@ import List exposing (..)
 
 keyToString : Keyboard.KeyCode -> String
 keyToString keyCode =
-    fromChar ( fromCode keyCode )
-
+    keyCode
+        |> fromCode
+        |> fromChar
 
 nth : Int -> List a -> Maybe a
 nth n xs =
@@ -44,8 +45,10 @@ removeLast : List a -> List a
 removeLast list =
     case list of
         [] -> []
-        l ->
-            List.reverse (drop 1 (List.reverse l))
+        l -> l
+          |> List.reverse
+          |> drop 1
+          |> List.reverse
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -59,7 +62,11 @@ update message model =
             ( { model | ctrl = False }, Cmd.none)
 
         KeyDownMsg 16 ->
-            ( { model | shift = True }, Cmd.none)
+            ( { model |
+                    shift = True,
+                    selectionStart = model.cursor
+              }
+            , Cmd.none )
 
         KeyUpMsg 16 ->
             ( { model | shift = False }, Cmd.none)
@@ -82,7 +89,7 @@ update message model =
                             let
                                 f = List.take x model.lines
                                 last =
-                                    case head (getLast f) of
+                                    case f |> getLast |> head of
                                         Nothing -> []
                                         Just a -> [(a ++ middle)]
                             in
@@ -107,11 +114,11 @@ update message model =
                                 _ -> left model
                     in
                         ( { model |
+                                selection = False,
                                 lines = lines,
                                 cursor = cursor
                           }
-                        , Cmd.none
-                        )
+                        , Cmd.none )
 
         -- handle other keys like arrows/tab
         KeyDownMsg keyCode ->
@@ -143,11 +150,11 @@ update message model =
                         lines = front ++ middle ++ back
                     in
                         ( { model |
+                                selection = False,
                                 lines = lines,
                                 cursor = (x, y)
                           }
-                        , Cmd.none
-                        )
+                        , Cmd.none )
 
                 -- explicit define space so it will not scroll page to bottom
                 32 ->
@@ -164,22 +171,24 @@ update message model =
                         lines = front ++ middle ++ back
                     in
                         ( { model |
+                                selection = False,
                                 lines = lines,
                                 cursor = (x,y + 1)
                           }
-                        ,Cmd.none
-                        )
+                        , Cmd.none )
+
+                -- escape remove selectioh
 
                 -- left/right
                 37 ->
-                    ( { model | cursor = left model }, Cmd.none)
+                    ( { model | cursor = left model, selection = model.shift }, Cmd.none)
                 39 ->
-                    ( { model | cursor = right model }, Cmd.none)
+                    ( { model | cursor = right model, selection = model.shift  }, Cmd.none)
                 -- up/down
                 38 ->
-                    ( { model | cursor = up model }, command "core:line-up" )
+                    ( { model | cursor = up model, selection = model.shift }, command "core:line-up" )
                 40 ->
-                    ( { model | cursor = down model }, command "core:line-down" )
+                    ( { model | cursor = down model, selection = model.shift }, command "core:line-down" )
                 _ ->
                     ( model, Cmd.none )
 
@@ -211,11 +220,12 @@ update message model =
 
                     in
                         ( { model |
+                                shift = False,
+                                selection = False,
                                 lines = lines,
                                 cursor = cursor
                           }
-                        , Cmd.none
-                        )
+                        , Cmd.none )
 
 
         OpenFile file ->
@@ -223,11 +233,11 @@ update message model =
                 lines = String.lines file
             in
                 ( { model |
+                        selection = False,
                         lines = lines,
                         cursor = (0, 0)
                   }
-                , Cmd.none
-                )
+                , Cmd.none )
         _ ->
             ( model, Cmd.none )
 
@@ -334,10 +344,9 @@ down model =
                 lineLength = getLineLength model.cursor 1 model.lines
             in
                 if x + 1 < lines then
-                    (x + 1,lineLength)
+                    (x + 1, lineLength)
                 else
                     model.cursor
 
 
 port command : String -> Cmd msg
---port scroll : Int -> Cmd msg

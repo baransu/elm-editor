@@ -31,15 +31,12 @@ ipcMain.on("open-file", (event, arg) => {
 });
 
 function openFile(event = mainWindow.webContents) {
-  //const filePath = path.join(__dirname, 'index.js');
   dialog.showOpenDialog(
     mainWindow,
     { properies: ['openFile'] },
     function(files) {
-      const file = files[0] || undefined;
-      if(file === undefined) return false;
-      // load file
-      fs.readFile(file, 'utf-8', function(err, data) {
+      if(files === undefined) return false;
+      fs.readFile(files[0], 'utf-8', function(err, data) {
         if(err) throw err;
         event.send("open-file", data);
       });

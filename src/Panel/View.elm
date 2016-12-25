@@ -39,6 +39,48 @@ cursorLeft : Int -> String
 cursorLeft y =
     toString (Basics.toFloat y * 7.8) ++ "px"
 
+
+selectionBlock : (Float, String) -> (Float, String) -> Int -> Int -> Html a
+selectionBlock width height left top =
+    div [ class "selection"
+        , style [ ("height", (toString (fst height)) ++ (snd height) )
+                , ("width", (toString (fst width)) ++ (snd width) )
+                , ("left", cursorLeft left )
+                , ("top", cursorTop top )
+                ]
+        ] []
+
+selection : Model -> List (Html a)
+selection { cursor, selectionStart } =
+    let
+        ( cursorX, cursorY ) = cursor
+        ( startX, startY ) = selectionStart
+        top = min cursorX startX
+        showEnd = linesCount - 1 >= 0
+        bottom = max cursorX startX
+        linesCount = abs ( cursorX - startX )
+        ( topLeft, bottomWidth ) =
+            if not showEnd then
+                ( min cursorY startY, abs ( cursorY - startY ) )
+            else if cursorX < startX then
+                ( cursorY, startY )
+            else
+                ( startY, cursorY )
+
+        selectionDivs =
+            if showEnd then
+                [ selectionBlock (100, "%") (16.0, "px") topLeft top
+                , selectionBlock (100, "%") (Basics.toFloat (linesCount - 1) * 16, "px") 0 (top + 1)
+                , selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") 0 bottom
+                ]
+            else
+                [ selectionBlock (Basics.toFloat bottomWidth * 7.8, "px") (16.0, "px") topLeft top
+                ]
+
+    in
+        selectionDivs
+
+
 view : Model -> Html Msg
 view model =
     pre [ id "panel", class "pan" ]
@@ -48,10 +90,13 @@ view model =
               [ div
                 [ class "cursor"
                 , id "cursor"
-                , style
-                      [ ("top", cursorTop (fst model.cursor) )
-                      , ("left", cursorLeft (snd model.cursor) )
-                      ]
+                , style [ ("top", cursorTop (fst model.cursor) )
+                        , ("left", cursorLeft (snd model.cursor) )
+                        ]
                 ] []
               ]
+        , div
+            [ class "layer selection-layer"
+            , style [ ("visibility", if model.selection then "visible" else "hidden") ]
+            ] (selection model)
         ]
