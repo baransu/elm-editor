@@ -15,8 +15,9 @@ import List exposing (..)
 
 keyToString : Keyboard.KeyCode -> String
 keyToString keyCode =
-    fromChar ( fromCode keyCode )
-
+    keyCode
+        |> fromCode
+        |> fromChar
 
 nth : Int -> List a -> Maybe a
 nth n xs =
@@ -44,8 +45,10 @@ removeLast : List a -> List a
 removeLast list =
     case list of
         [] -> []
-        l ->
-            List.reverse (drop 1 (List.reverse l))
+        l -> l
+          |> List.reverse
+          |> drop 1
+          |> List.reverse
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -86,7 +89,7 @@ update message model =
                             let
                                 f = List.take x model.lines
                                 last =
-                                    case head (getLast f) of
+                                    case f |> getLast |> head of
                                         Nothing -> []
                                         Just a -> [(a ++ middle)]
                             in
@@ -341,7 +344,7 @@ down model =
                 lineLength = getLineLength model.cursor 1 model.lines
             in
                 if x + 1 < lines then
-                    (x + 1,lineLength)
+                    (x + 1, lineLength)
                 else
                     model.cursor
 
