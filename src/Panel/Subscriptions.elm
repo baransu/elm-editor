@@ -7,7 +7,9 @@ import Keyboard
 
 -- SUBSCRIPTIONS
 
+
 port onCommand : (String -> msg) -> Sub msg
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =

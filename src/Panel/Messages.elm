@@ -1,11 +1,13 @@
 module Panel.Messages exposing (..)
 
-import Keyboard
+import Keyboard exposing (KeyCode)
+
 
 -- MESSAGES
-type Msg
-    = KeyPressedMsg Keyboard.KeyCode
-    | KeyDownMsg Keyboard.KeyCode
-    | KeyUpMsg Keyboard.KeyCode
-    | OpenFile String
 
+
+type Msg
+    = KeyPressedMsg KeyCode
+    | KeyDownMsg KeyCode
+    | KeyUpMsg KeyCode
+    | OpenFile String

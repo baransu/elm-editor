@@ -12,24 +12,30 @@ import Panel.View exposing (..)
 
 -- MODEL
 
+
 type alias Model =
-    { panelModel: Panel.Model.Model }
+    { panelModel : Panel.Model.Model }
+
 
 init : ( Model, Cmd Msg )
 init =
-    ({ panelModel = Panel.Model.initialModel
-     }
+    ( { panelModel = Panel.Model.initialModel
+      }
     , Cmd.none
     )
 
 
+
 -- MESSAGES
+
 
 type Msg
     = PanelMsg Panel.Messages.Msg
 
 
+
 -- VIEW
+
 
 view : Model -> Html Msg
 view model =
@@ -37,7 +43,9 @@ view model =
         [ Html.App.map PanelMsg (Panel.View.view model.panelModel) ]
 
 
+
 -- UPDATE
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -47,20 +55,25 @@ update msg model =
                 ( updatePanelModel, panelCmd ) =
                     Panel.Update.update subMsg model.panelModel
             in
-                ({ model | panelModel = updatePanelModel }
+                ( { model | panelModel = updatePanelModel }
                 , Cmd.map PanelMsg panelCmd
                 )
 
 
+
 -- SUBSCRIPTIONS
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map PanelMsg ( Panel.Subscriptions.subscriptions model.panelModel )
+        [ Sub.map PanelMsg (Panel.Subscriptions.subscriptions model.panelModel)
         ]
 
+
+
 -- MAIN
+
 
 main : Program Never
 main =
@@ -70,4 +83,3 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-
