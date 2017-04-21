@@ -1,4 +1,4 @@
-module Panel.Messages exposing (..)
+module Editor.Messages exposing (..)
 
 import Keyboard exposing (KeyCode)
 

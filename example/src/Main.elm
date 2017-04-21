@@ -1,24 +1,24 @@
 module Main exposing (..)
 
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (..)
-import Panel.Model exposing (..)
-import Panel.Messages exposing (..)
-import Panel.Subscriptions exposing (..)
-import Panel.Update exposing (..)
-import Panel.View exposing (..)
+import Html.Attributes exposing (class)
+import Editor.Model exposing (..)
+import Editor.Messages exposing (..)
+import Editor.Subscriptions exposing (..)
+import Editor.Update exposing (..)
+import Editor.View exposing (..)
 
 
 -- MODEL
 
 
 type alias Model =
-    { panelModel : Panel.Model.Model }
+    { panelModel : Editor.Model.Model }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { panelModel = Panel.Model.initialModel
+    ( { panelModel = Editor.Model.initialModel
       }
     , Cmd.none
     )
@@ -29,7 +29,7 @@ init =
 
 
 type Msg
-    = PanelMsg Panel.Messages.Msg
+    = EditorMsg Editor.Messages.Msg
 
 
 
@@ -38,8 +38,9 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "application" ]
-        [ Html.map PanelMsg (Panel.View.view model.panelModel) ]
+    div [ class "app" ]
+        [ Html.map EditorMsg (Editor.View.view model.panelModel)
+        ]
 
 
 
@@ -49,13 +50,13 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        PanelMsg subMsg ->
+        EditorMsg subMsg ->
             let
-                ( updatePanelModel, panelCmd ) =
-                    Panel.Update.update subMsg model.panelModel
+                ( updateEditorModel, panelCmd ) =
+                    Editor.Update.update subMsg model.panelModel
             in
-                ( { model | panelModel = updatePanelModel }
-                , Cmd.map PanelMsg panelCmd
+                ( { model | panelModel = updateEditorModel }
+                , Cmd.map EditorMsg panelCmd
                 )
 
 
@@ -66,7 +67,7 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map PanelMsg (Panel.Subscriptions.subscriptions model.panelModel)
+        [ Sub.map EditorMsg (Editor.Subscriptions.subscriptions model.panelModel)
         ]
 
 
@@ -74,7 +75,7 @@ subscriptions model =
 -- MAIN
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
     Html.program
         { init = init

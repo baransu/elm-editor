@@ -1,10 +1,10 @@
-port module Panel.Update exposing (..)
+port module Editor.Update exposing (..)
 
 import Char exposing (..)
 import Debug exposing (..)
 import Keyboard
-import Panel.Messages exposing (..)
-import Panel.Model exposing (..)
+import Editor.Messages exposing (..)
+import Editor.Model exposing (..)
 import String exposing (..)
 import List exposing (..)
 

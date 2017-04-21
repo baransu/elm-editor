@@ -1,17 +1,11 @@
-module Panel.View exposing (..)
+module Editor.View exposing (..)
 
-import Char exposing (..)
-import Debug exposing (..)
 import Html exposing (Html, div, text, span, pre)
 import Html.Attributes exposing (class, style, id)
-import Html.Events exposing (on, keyCode)
-import Json.Decode as Json
-import Keyboard
 import List exposing (..)
-import String exposing (..)
-import Task exposing (Task)
-import Panel.Model exposing (..)
-import Panel.Messages exposing (..)
+import Html.Keyed as Keyed
+import Editor.Model exposing (..)
+import Editor.Messages exposing (..)
 
 
 -- VIEW
@@ -27,10 +21,17 @@ emptyLineHelper l =
             l
 
 
-renderLine : String -> Html a
-renderLine l =
-    div [ class "line" ]
+renderLine : Int -> String -> ( String, Html a )
+renderLine key l =
+    ( toString key
+    , div
+        [ class "line" ]
         [ span [] [ text (emptyLineHelper l) ] ]
+    )
+
+
+
+-- helper debuging function
 
 
 cursorToString : ( Int, Int ) -> String
@@ -106,13 +107,12 @@ selection { cursor, selectionStart } =
 
 view : Model -> Html Msg
 view model =
-    pre [ id "panel", class "pan" ]
-        [ div [ class "layer code-layer" ] (List.map renderLine model.lines)
+    pre [ class "pane" ]
+        [ Keyed.node "div" [ class "layer code-layer" ] (List.indexedMap renderLine model.lines)
         , div
             [ class "layer cursor-layer" ]
             [ div
                 [ class "cursor"
-                , id "cursor"
                 , style
                     [ ( "top", cursorTop (Tuple.first model.cursor) )
                     , ( "left", cursorLeft (Tuple.second model.cursor) )

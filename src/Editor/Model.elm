@@ -1,4 +1,4 @@
-module Panel.Model exposing (..)
+module Editor.Model exposing (..)
 
 -- MODEL
 
