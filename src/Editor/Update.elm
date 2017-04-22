@@ -1,7 +1,6 @@
 port module Editor.Update exposing (..)
 
 import Char exposing (..)
-import Debug exposing (..)
 import Keyboard
 import Editor.Messages exposing (..)
 import Editor.Model exposing (..)
@@ -224,7 +223,7 @@ update message model =
                 32 ->
                     let
                         char =
-                            " "
+                            ""
 
                         x =
                             Tuple.first model.cursor
@@ -252,25 +251,45 @@ update message model =
                         ( { model
                             | selection = False
                             , lines = lines
-                            , cursor = ( x, y + 1 )
+                            , cursor = ( x, y )
                           }
                         , Cmd.none
                         )
 
-                -- escape remove selectioh
+                -- escape remove selection
                 -- left/right
                 37 ->
-                    ( { model | cursor = left model, selection = model.shift }, Cmd.none )
+                    ( { model
+                        | cursor = left model
+                        , selection = model.shift
+                      }
+                    , Cmd.none
+                    )
 
                 39 ->
-                    ( { model | cursor = right model, selection = model.shift }, Cmd.none )
+                    ( { model
+                        | cursor = right model
+                        , selection = model.shift
+                      }
+                    , Cmd.none
+                    )
 
                 -- up/down
                 38 ->
-                    ( { model | cursor = up model, selection = model.shift }, command "core:line-up" )
+                    ( { model
+                        | cursor = up model
+                        , selection = model.shift
+                      }
+                    , command [ "core:line-up" ]
+                    )
 
                 40 ->
-                    ( { model | cursor = down model, selection = model.shift }, command "core:line-down" )
+                    ( { model
+                        | cursor = down model
+                        , selection = model.shift
+                      }
+                    , command [ "core:line-down" ]
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -489,4 +508,9 @@ down model =
                     model.cursor
 
 
-port command : String -> Cmd msg
+
+-- we should not use port but be should have command
+-- and do things in editor by commands
+
+
+port command : List String -> Cmd msg

@@ -1,7 +1,7 @@
 module Editor.View exposing (..)
 
 import Html exposing (Html, div, text, span, pre)
-import Html.Attributes exposing (class, style, id)
+import Html.Attributes exposing (class, style, id, tabindex)
 import List exposing (..)
 import Html.Keyed as Keyed
 import Editor.Model exposing (..)
@@ -21,32 +21,48 @@ emptyLineHelper l =
             l
 
 
+
+-- CODE RENDERING
+
+
 renderLine : Int -> String -> ( String, Html a )
 renderLine key l =
     ( toString key
     , div
         [ class "line" ]
-        [ span [] [ text (emptyLineHelper l) ] ]
+        [ div [ style [ ( "position", "absolute" ), ( "left", "-30px" ) ] ]
+            [ div [ class "linenumber" ] [ text <| toString key ] ]
+        , pre []
+            [ span [] [ text (emptyLineHelper l) ] ]
+        ]
     )
 
 
-
--- helper debuging function
-
-
-cursorToString : ( Int, Int ) -> String
-cursorToString ( x, y ) =
-    toString x ++ " | " ++ toString y
+renderCode : Model -> Html a
+renderCode model =
+    Keyed.node "div"
+        [ class "layer code-layer" ]
+        (List.indexedMap renderLine model.lines)
 
 
-cursorTop : Int -> String
-cursorTop x =
-    toString (Basics.toFloat x * 16) ++ "px"
+
+-- CURSOR RENDERING
 
 
-cursorLeft : Int -> String
-cursorLeft y =
-    toString (Basics.toFloat y * 7.8) ++ "px"
+renderCursor : Model -> Html a
+renderCursor model =
+    div
+        [ class "cursor"
+        , style
+            [ ( "top", cursorTop (Tuple.first model.cursor) )
+            , ( "left", cursorLeft (Tuple.second model.cursor) )
+            ]
+        ]
+        []
+
+
+
+-- SELECTION RENDERING
 
 
 selectionBlock : ( Float, String ) -> ( Float, String ) -> Int -> Int -> Html a
@@ -105,31 +121,66 @@ selection { cursor, selectionStart } =
         selectionDivs
 
 
+renderSelection : Model -> Html a
+renderSelection model =
+    div
+        [ class "layer selection-layer"
+        , style
+            [ ( "visibility"
+              , if model.selection then
+                    "visible"
+                else
+                    "hidden"
+              )
+            ]
+        ]
+        (selection model)
+
+
+
+-- helper debuging function
+
+
+cursorToString : ( Int, Int ) -> String
+cursorToString ( x, y ) =
+    toString x ++ " | " ++ toString y
+
+
+cursorTop : Int -> String
+cursorTop x =
+    toString (Basics.toFloat x * 16) ++ "px"
+
+
+cursorLeft : Int -> String
+cursorLeft y =
+    toString (Basics.toFloat y * 7.8) ++ "px"
+
+
+
+-- TODO should we move key events from window to pane because of Tab focus
+
+
+codeHeight : List a -> ( String, String )
+codeHeight lines =
+    ( "height"
+    , lines
+        |> List.length
+        |> (*) 16
+        |> toString
+        |> (\a b -> b ++ a) "px"
+    )
+
+
 view : Model -> Html Msg
 view model =
-    pre [ class "pane" ]
-        [ Keyed.node "div" [ class "layer code-layer" ] (List.indexedMap renderLine model.lines)
-        , div
-            [ class "layer cursor-layer" ]
-            [ div
-                [ class "cursor"
-                , style
-                    [ ( "top", cursorTop (Tuple.first model.cursor) )
-                    , ( "left", cursorLeft (Tuple.second model.cursor) )
-                    ]
-                ]
-                []
+    div [ class "pane", style [ codeHeight model.lines ] ]
+        [ div [ class "sizer" ]
+            [ renderCode model
+            , renderCursor model
+            , renderSelection model
             ]
-        , div
-            [ class "layer selection-layer"
-            , style
-                [ ( "visibility"
-                  , if model.selection then
-                        "visible"
-                    else
-                        "hidden"
-                  )
-                ]
-            ]
-            (selection model)
+          -- dyanimc height
+        , div [ class "gutters", style [ codeHeight model.lines ] ]
+            -- dynamic width
+            [ div [ class "gutter", style [ ( "width", "30px" ) ] ] [] ]
         ]
